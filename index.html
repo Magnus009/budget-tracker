@@ -1,0 +1,317 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f3eeea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Budget" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>Budget Tracker</title>
+    <link rel="stylesheet" href="styles.css?v=18" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <div class="page-shell">
+
+      <!-- ══════════════════════════════════════════
+           DASHBOARD VIEW — cutoff list + create
+      ══════════════════════════════════════════ -->
+      <div id="dashboardView" class="view-root">
+
+        <header class="app-bar">
+          <div class="app-bar-brand">
+            <h1>Budget Tracker</h1>
+            <span id="storageStatus" class="storage-badge">●</span>
+          </div>
+          <div class="app-bar-actions">
+            <button id="menuBtn" class="icon-btn" type="button" aria-label="Open menu">&#9776;</button>
+          </div>
+        </header>
+
+        <div id="cutoffList" class="cutoff-list"></div>
+
+      </div><!-- /dashboardView -->
+
+
+      <!-- ══════════════════════════════════════════
+           CUTOFF DETAIL VIEW — stats, categories, entries
+      ══════════════════════════════════════════ -->
+      <div id="cutoffDetailView" class="view-root" hidden>
+
+        <header class="sub-bar">
+          <button id="backToDashboardBtn" class="back-btn" type="button">&#8592; Cutoffs</button>
+          <p class="sub-bar-title" id="cutoffDetailTitle"></p>
+          <div style="display:flex;gap:0.4rem">
+            <button id="lockCutoffBtn" class="btn-chip" type="button"></button>
+            <button id="copyPrevPlanBtn" class="btn-chip" type="button" title="Copy plan from previous cutoff">&#8635; Plan</button>
+            <button id="exportBtn" class="btn-chip btn-chip-outline" type="button">Export</button>
+          </div>
+        </header>
+
+        <section class="panel financial-overview">
+          <div class="overview-header">
+            <h2 class="overview-title">Financial Overview</h2>
+            <p class="overview-date" id="activeCutoffSummary"></p>
+          </div>
+          <table class="overview-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th class="right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Total Income</td>
+                <td class="right amount-positive" id="overviewIncome">—</td>
+              </tr>
+              <tr>
+                <td>Total Expenses</td>
+                <td class="right amount-negative" id="overviewExpenses">—</td>
+              </tr>
+              <tr>
+                <td>Total Savings</td>
+                <td class="right" id="overviewSavings">—</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="overview-total-row">
+                <td>Remaining</td>
+                <td class="right" id="overviewTotal">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </section>
+
+        <section class="panel cash-flow-panel">
+          <h2 class="cash-flow-title">Cash Flow</h2>
+          <table class="cash-flow-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th class="right">Expected</th>
+                <th class="right">Actual</th>
+              </tr>
+            </thead>
+            <tbody id="cashFlowBody"></tbody>
+            <tfoot>
+              <tr class="cash-flow-total-row">
+                <td>Remaining</td>
+                <td class="right" id="cashFlowExpectedTotal">—</td>
+                <td class="right" id="cashFlowActualTotal">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </section>
+
+        <section class="panel lists-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Ledger</p>
+              <h2>Entries</h2>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Note</th>
+                  <th class="right">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="transactionList"></tbody>
+            </table>
+          </div>
+        </section>
+
+      </div><!-- /cutoffDetailView -->
+
+
+      <!-- ══════════════════════════════════════════
+           CATEGORY VIEW — drill-down transactions
+      ══════════════════════════════════════════ -->
+      <div id="categoryScreen" class="view-root" hidden>
+
+        <header class="sub-bar">
+          <button id="backToCutoffBtn" class="back-btn" type="button">&#8592; Back</button>
+          <p class="sub-bar-title" id="categoryScreenTitle"></p>
+          <span></span>
+        </header>
+
+        <details class="panel collapsible category-plan-panel" id="categoryPlanPanel" open>
+          <summary class="panel-summary"><span id="categoryPlanTitle">Plan</span></summary>
+          <div class="panel-body">
+            <table class="income-table">
+              <thead>
+                <tr><th class="col-toggle"></th><th>Description</th><th>Expected</th><th>Actual</th><th></th></tr>
+              </thead>
+              <tbody id="categoryPlanBody"></tbody>
+              <tfoot>
+                <tr>
+                  <td></td>
+                  <td><strong>Total</strong></td>
+                  <td id="categoryPlanTotalExpected">—</td>
+                  <td id="categoryPlanTotalActual">—</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+            <button type="button" id="addCategoryPlanRowBtn" class="chip-button" style="margin-top:0.5rem">+ Add row</button>
+            <button type="button" id="saveCategoryPlanBtn" class="button button-secondary" style="margin-top:0.5rem;width:100%">Save</button>
+          </div>
+        </details>
+
+      </div><!-- /categoryScreen -->
+
+      <p class="footnote" id="statusLine" aria-live="polite"></p>
+    </div>
+
+    <!-- ── Shared overlay ── -->
+    <div id="overlay" class="overlay" hidden></div>
+
+    <!-- ── Drawer ── -->
+    <div id="menuDrawer" class="drawer" aria-hidden="true">
+      <div class="drawer-header">
+        <span class="drawer-title">Options</span>
+        <button id="drawerCloseBtn" class="icon-btn" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="drawer-body">
+        <label class="drawer-item" for="importInput">&#8593; Import JSON</label>
+        <input id="importInput" type="file" accept="application/json" hidden />
+        <button id="exportAllBtn" class="drawer-item" type="button">&#8595; Export all</button>
+        <hr class="drawer-divider" />
+        <form id="settingsForm" class="drawer-currency-row">
+          <label class="drawer-currency-label">
+            <span>Currency</span>
+            <input id="currencyLabel" name="currencyLabel" type="text" maxlength="8" placeholder="PHP" required />
+          </label>
+          <button class="button button-secondary" type="submit">Save</button>
+        </form>
+        <hr class="drawer-divider" />
+        <button id="resetBtn" class="drawer-item drawer-danger" type="button">Reset data</button>
+      </div>
+    </div>
+
+    <!-- ── New / Edit Cutoff sheet ── -->
+    <div id="cutoffSheet" class="bottom-sheet" aria-hidden="true">
+      <div class="sheet-drag-handle"></div>
+      <div class="sheet-header">
+        <span class="sheet-title" id="cutoffSheetTitle">New cutoff</span>
+        <button id="cutoffSheetCloseBtn" class="icon-btn" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="sheet-body">
+        <form id="cutoffForm" class="form-grid">
+          <label>
+            <span>Name</span>
+            <input id="cutoffName" name="name" type="text" placeholder="Pay cycle 1" required />
+          </label>
+          <div class="span-2 income-sources-section">
+            <div class="income-sources-header">
+              <span class="form-label">Income Sources</span>
+              <button type="button" id="addIncomeRowBtn" class="chip-button">+ Add row</button>
+            </div>
+            <table class="income-table">
+              <thead>
+                <tr><th>Description</th><th>Expected</th><th>Actual</th><th></th></tr>
+              </thead>
+              <tbody id="incomeSourcesBody"></tbody>
+              <tfoot>
+                <tr>
+                  <td><strong>Total</strong></td>
+                  <td id="incomeTotalExpected">—</td>
+                  <td id="incomeTotalActual">—</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div class="span-2 plan-section" data-plan-category="EXPENSES">
+            <div class="income-sources-header">
+              <span class="form-label">Expenses Plan</span>
+              <button type="button" class="chip-button add-plan-row-btn" data-plan-category="EXPENSES">+ Add row</button>
+            </div>
+            <table class="income-table">
+              <thead><tr><th>Description</th><th>Expected</th><th></th></tr></thead>
+              <tbody class="plan-body" data-plan-category="EXPENSES"></tbody>
+              <tfoot><tr>
+                <td><strong>Total</strong></td>
+                <td class="plan-total" data-plan-category="EXPENSES">—</td>
+                <td></td>
+              </tr></tfoot>
+            </table>
+          </div>
+
+          <div class="span-2 plan-section" data-plan-category="SAVINGS">
+            <div class="income-sources-header">
+              <span class="form-label">Savings Plan</span>
+              <button type="button" class="chip-button add-plan-row-btn" data-plan-category="SAVINGS">+ Add row</button>
+            </div>
+            <table class="income-table">
+              <thead><tr><th>Description</th><th>Expected</th><th></th></tr></thead>
+              <tbody class="plan-body" data-plan-category="SAVINGS"></tbody>
+              <tfoot><tr>
+                <td><strong>Total</strong></td>
+                <td class="plan-total" data-plan-category="SAVINGS">—</td>
+                <td></td>
+              </tr></tfoot>
+            </table>
+          </div>
+
+          <div class="span-2 plan-section" data-plan-category="DEBTS">
+            <div class="income-sources-header">
+              <span class="form-label">Debts Plan</span>
+              <button type="button" class="chip-button add-plan-row-btn" data-plan-category="DEBTS">+ Add row</button>
+            </div>
+            <table class="income-table">
+              <thead><tr><th>Description</th><th>Expected</th><th></th></tr></thead>
+              <tbody class="plan-body" data-plan-category="DEBTS"></tbody>
+              <tfoot><tr>
+                <td><strong>Total</strong></td>
+                <td class="plan-total" data-plan-category="DEBTS">—</td>
+                <td></td>
+              </tr></tfoot>
+            </table>
+          </div>
+
+          <div class="span-2 plan-section" data-plan-category="BILLS">
+            <div class="income-sources-header">
+              <span class="form-label">Bills Plan</span>
+              <button type="button" class="chip-button add-plan-row-btn" data-plan-category="BILLS">+ Add row</button>
+            </div>
+            <table class="income-table">
+              <thead><tr><th>Description</th><th>Expected</th><th></th></tr></thead>
+              <tbody class="plan-body" data-plan-category="BILLS"></tbody>
+              <tfoot><tr>
+                <td><strong>Total</strong></td>
+                <td class="plan-total" data-plan-category="BILLS">—</td>
+                <td></td>
+              </tr></tfoot>
+            </table>
+          </div>
+          <label>
+            <span>Start date</span>
+            <input id="cutoffStart" name="startDate" type="date" required />
+          </label>
+          <label>
+            <span>End date</span>
+            <input id="cutoffEnd" name="endDate" type="date" required />
+          </label>
+          <label class="span-2">
+            <span>Notes</span>
+            <textarea id="cutoffNotes" name="notes" rows="2" placeholder="Optional"></textarea>
+          </label>
+          <button class="button button-primary span-2" id="cutoffSubmitBtn" type="submit">Add cutoff</button>
+          <button class="button button-ghost span-2" id="cutoffCancelEditBtn" type="button" hidden>Cancel edit</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── FAB ── -->
+    <button id="fabNewCutoff" class="fab" type="button" aria-label="New cutoff">+</button>
+
+  </body>
+</html>

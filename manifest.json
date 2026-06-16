@@ -1,0 +1,18 @@
+{
+  "name": "Budget Tracker",
+  "short_name": "Budget",
+  "description": "Local-first personal budget tracking. No server needed.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#f3eeea",
+  "background_color": "#f3eeea",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
